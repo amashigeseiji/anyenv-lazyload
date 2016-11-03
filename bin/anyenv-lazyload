@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Usage: eval "$(anyenv lazyload)"
+# Summary: Initialize `**env` lazy instead of `anyenv init`.
+
+for env in $(/bin/ls $ANYENV_ROOT/envs/)
+do
+
+  shims=${shims}$ANYENV_ROOT/envs/$env/shims:
+
+  # init on call **env
+  cat <<EOS
+function ${env}() {
+  unset -f ${env}
+  export ${env^^}_ROOT="$ANYENV_ROOT/envs/$env"
+  export PATH=$ANYENV_ROOT/envs/${env}/bin:\${PATH}
+  eval "\$(${env} init - \${SHELL})"
+  ${env} \$@
+}
+EOS
+
+  if [ -e $ANYENV_ROOT/envs/${env}/completions/${env}.${SHELL##*/} ];then
+    echo "source $ANYENV_ROOT/envs/${env}/completions/${env}.${SHELL##*/}"
+  fi
+
+done
+echo "export PATH=${shims}${PATH}"
