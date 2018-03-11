@@ -6,12 +6,13 @@ for env in $(/bin/ls $ANYENV_ROOT/envs/)
 do
 
   shims=${shims}$ANYENV_ROOT/envs/$env/shims:
+  ENV_ROOT=$(echo ${env} | awk '{print toupper($0)}')_ROOT
 
   # init on call **env
   cat <<EOS
 function ${env}() {
   unset -f ${env}
-  export ${env^^}_ROOT="$ANYENV_ROOT/envs/$env"
+  export ${ENV_ROOT}="$ANYENV_ROOT/envs/$env"
   export PATH=$ANYENV_ROOT/envs/${env}/bin:\${PATH}
   eval "\$(${env} init - \${SHELL})"
   ${env} \$@
